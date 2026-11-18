@@ -1,211 +1,220 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskPulse // Spring Boot REST API Task Manager</title>
-    <meta name="description" content="Production-ready Task Management REST API with Spring Boot, JPA, MySQL, and modern UI">
+    <title>TaskPulse ✨ Artisanal Pastel Task Studio</title>
+    <meta name="description" content="Handcrafted Task Management with Spring Boot, JPA, MySQL and a warm pastel interface">
     <link rel="stylesheet" href="/css/styles.css">
-    <!-- Modern Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
 </head>
 <body>
 
-    <!-- Header Navigation -->
+    <!-- Top Navigation Header -->
     <header class="app-header">
         <div class="container header-content">
-            <a href="/" class="logo-group">
-                <div class="logo-icon">⚡</div>
-                <div class="logo-text">
-                    <h1>TaskPulse <span class="logo-badge">Spring Boot 3</span></h1>
-                    <p>REST API &bull; MySQL &bull; JPA &bull; Maven</p>
+            <a href="/" class="brand-wrapper">
+                <div class="brand-stamp">🌸</div>
+                <div class="brand-details">
+                    <h1>TaskPulse <span class="brand-handwritten">Pastel Edition</span></h1>
+                    <p>Spring Boot 3 &bull; JPA &bull; MySQL &bull; Maven</p>
                 </div>
             </a>
 
-            <div class="header-center">
-                <div class="status-indicator">
-                    <span class="status-dot"></span>
-                    <span>API LIVE &bull; 8080</span>
-                </div>
+            <!-- Greeting Banner with Live Spring Boot Status -->
+            <div class="greeting-bubble">
+                <span class="greeting-dot"></span>
+                <span id="liveGreetingText">Good day, Maker ✨</span>
+                <span style="opacity: 0.5;">|</span>
+                <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">API Live :8080</span>
             </div>
 
-            <div class="header-actions">
-                <a href="/swagger-ui.html" target="_blank" class="btn" title="Open Swagger OpenAPI Documentation">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                    Swagger UI
+            <!-- Header Action Controls -->
+            <div class="header-right">
+                <a href="/swagger-ui.html" target="_blank" class="btn" title="Inspect API on Swagger UI">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    Swagger Docs
                 </a>
                 <button type="button" class="btn" onclick="openCategoryModal()" title="Manage Categories">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
                     Categories
                 </button>
-                <button type="button" class="btn btn-icon" id="themeToggleBtn" title="Toggle Light/Dark Theme">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                <button type="button" class="btn btn-icon" id="themeToggleBtn" title="Toggle Soft Dark / Cream Light">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
                 </button>
                 <button type="button" class="btn btn-primary" onclick="openCreateTaskModal()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     New Task
-                    <kbd>N</kbd>
+                    <kbd style="font-size: 10px; padding: 2px 5px; background: rgba(0,0,0,0.1); border-radius: 4px; font-weight: 800;">N</kbd>
                 </button>
             </div>
         </div>
     </header>
 
     <!-- Main Workspace -->
-    <main class="container" style="padding-top: 10px; padding-bottom: 40px;">
+    <main class="container" style="padding-bottom: 48px;">
 
-        <!-- Analytics Overview Bar -->
-        <section class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-title">Total Tasks</span>
-                    <div class="stat-icon icon-blue">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                    </div>
+        <!-- 4 Pastel Stat Bubbles -->
+        <section class="stats-strip">
+            <!-- Box 1: Total -->
+            <div class="stat-box stat-box-lavender">
+                <div class="stat-label-row">
+                    <span class="stat-tag">All Tasks</span>
+                    <span class="stat-emoji">📚</span>
                 </div>
-                <div class="stat-value" id="totalTasksCount">-</div>
-                <div class="stat-meta">Across all categories</div>
+                <div class="stat-number" id="totalTasksCount">-</div>
+                <div class="stat-subtext">Across all project streams</div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-title">In Progress</span>
-                    <div class="stat-icon icon-amber">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    </div>
+            <!-- Box 2: In Motion -->
+            <div class="stat-box stat-box-peach">
+                <div class="stat-label-row">
+                    <span class="stat-tag">In Motion</span>
+                    <span class="stat-emoji">🔥</span>
                 </div>
-                <div class="stat-value" id="inProgressCount">-</div>
-                <div class="stat-meta">Active sprint execution</div>
+                <div class="stat-number" id="inProgressCount">-</div>
+                <div class="stat-subtext">Currently being worked on</div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-title">Completed</span>
-                    <div class="stat-icon icon-emerald">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    </div>
+            <!-- Box 3: Completed -->
+            <div class="stat-box stat-box-mint">
+                <div class="stat-label-row">
+                    <span class="stat-tag">Celebrated & Done</span>
+                    <span class="stat-emoji">✨</span>
                 </div>
-                <div class="stat-value" id="completedCount">-</div>
-                <div class="stat-progress">
-                    <div class="stat-progress-bar" id="completionProgressBar" style="width: 0%;"></div>
+                <div class="stat-number" id="completedCount">-</div>
+                <div class="stat-progress-track">
+                    <div class="stat-progress-fill" id="completionProgressBar" style="width: 0%;"></div>
                 </div>
-                <div class="stat-meta" id="completionRateText">0% Completion</div>
+                <div class="stat-subtext" id="completionRateText">0% Complete</div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-title">Overdue Alerts</span>
-                    <div class="stat-icon icon-rose">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    </div>
+            <!-- Box 4: Overdue Alerts -->
+            <div class="stat-box stat-box-rose">
+                <div class="stat-label-row">
+                    <span class="stat-tag">Need Love Soon</span>
+                    <span class="stat-emoji">⏳</span>
                 </div>
-                <div class="stat-value" id="overdueCount">-</div>
-                <div class="stat-meta">Action required</div>
+                <div class="stat-number" id="overdueCount">-</div>
+                <div class="stat-subtext">Past due or urgent attention</div>
             </div>
         </section>
 
-        <!-- Filters & Toolbar -->
-        <section class="controls-bar">
-            <div class="search-box">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="text" id="searchInput" class="search-input" placeholder="Search tasks by title or description... (Press /)">
-            </div>
+        <!-- Inline Brain Dump Quick Composer -->
+        <section class="quick-composer">
+            <span class="quick-composer-icon">💡</span>
+            <input type="text" id="quickTaskInput" class="quick-composer-input" 
+                   placeholder="Brain dump: Type a quick task and press Enter to add directly to Backlog... (or press N for full editor)">
+            <span class="quick-composer-hint">↵ Enter to Save</span>
+        </section>
 
-            <div class="filters-group">
-                <select id="statusFilter" class="select-filter">
-                    <option value="">All Statuses</option>
-                    <option value="PENDING">Pending</option>
-                    <option value="IN_PROGRESS">In Progress</option>
-                    <option value="COMPLETED">Completed</option>
-                    <option value="CANCELLED">Cancelled</option>
+        <!-- Control Bar: Search & Filters -->
+        <section class="board-controls">
+            <div class="filters-cluster">
+                <div class="search-field">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="searchInput" placeholder="Search tasks... (Press /)">
+                </div>
+
+                <select id="statusFilter" class="pastel-select">
+                    <option value="">Status: All</option>
+                    <option value="PENDING">To Do / Pending</option>
+                    <option value="IN_PROGRESS">In Motion</option>
+                    <option value="COMPLETED">Done &amp; Dusted</option>
+                    <option value="CANCELLED">Archived</option>
                 </select>
 
-                <select id="priorityFilter" class="select-filter">
-                    <option value="">All Priorities</option>
-                    <option value="URGENT">Urgent</option>
-                    <option value="HIGH">High</option>
-                    <option value="MEDIUM">Medium</option>
-                    <option value="LOW">Low</option>
+                <select id="priorityFilter" class="pastel-select">
+                    <option value="">Priority: All</option>
+                    <option value="URGENT">🔥 Urgent</option>
+                    <option value="HIGH">⚡ High</option>
+                    <option value="MEDIUM">🌱 Medium</option>
+                    <option value="LOW">🍃 Low</option>
                 </select>
 
-                <select id="categoryFilter" class="select-filter">
-                    <option value="">All Categories</option>
+                <select id="categoryFilter" class="pastel-select">
+                    <option value="">Category: All</option>
                 </select>
 
-                <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); cursor: pointer; margin-left: 4px;">
-                    <input type="checkbox" id="overdueOnlyFilter" style="accent-color: #ef4444; cursor: pointer;">
-                    Overdue Only
+                <label class="checkbox-pill">
+                    <input type="checkbox" id="overdueOnlyFilter">
+                    <span>Show Overdue Only</span>
                 </label>
             </div>
 
-            <div class="view-toggle">
+            <!-- View Switcher -->
+            <div class="view-switcher">
                 <button type="button" class="view-btn active" id="kanbanBtn">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
-                    Kanban
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="18" rx="2"/><rect x="14" y="3" width="7" height="18" rx="2"/></svg>
+                    Kanban Shelves
                 </button>
                 <button type="button" class="view-btn" id="tableBtn">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                    Table
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    Table List
                 </button>
             </div>
         </section>
 
-        <!-- View 1: Kanban Board -->
-        <section class="kanban-grid" id="kanbanView">
-            <!-- Column 1: Pending -->
-            <div class="kanban-column" id="pendingColumn">
-                <div class="kanban-column-header">
-                    <div class="column-title-group">
-                        <span class="column-dot dot-pending"></span>
-                        <span class="column-title">To Do / Pending</span>
+        <!-- View 1: Pastel Kanban Shelves -->
+        <section class="kanban-board" id="kanbanView">
+            <!-- Shelf 1: Backlog & To Do -->
+            <div class="column-shelf" id="pendingColumn">
+                <div class="column-shelf-header">
+                    <div class="shelf-title-group">
+                        <span class="shelf-badge shelf-badge-pending">
+                            <span>🌱</span> Backlog &amp; To Do
+                        </span>
                     </div>
-                    <span class="column-count" id="pendingColCount">0</span>
+                    <span class="shelf-count" id="pendingColCount">0</span>
                 </div>
-                <div class="kanban-card-list" id="pendingCardList">
+                <div class="cards-stream" id="pendingCardList">
                     <!-- Cards populated via app.js -->
                 </div>
             </div>
 
-            <!-- Column 2: In Progress -->
-            <div class="kanban-column" id="progressColumn">
-                <div class="kanban-column-header">
-                    <div class="column-title-group">
-                        <span class="column-dot dot-progress"></span>
-                        <span class="column-title">In Progress</span>
+            <!-- Shelf 2: In Motion -->
+            <div class="column-shelf" id="progressColumn">
+                <div class="column-shelf-header">
+                    <div class="shelf-title-group">
+                        <span class="shelf-badge shelf-badge-progress">
+                            <span>⚡</span> In Motion
+                        </span>
                     </div>
-                    <span class="column-count" id="progressColCount">0</span>
+                    <span class="shelf-count" id="progressColCount">0</span>
                 </div>
-                <div class="kanban-card-list" id="progressCardList">
+                <div class="cards-stream" id="progressCardList">
                     <!-- Cards populated via app.js -->
                 </div>
             </div>
 
-            <!-- Column 3: Completed -->
-            <div class="kanban-column" id="completedColumn">
-                <div class="kanban-column-header">
-                    <div class="column-title-group">
-                        <span class="column-dot dot-completed"></span>
-                        <span class="column-title">Completed</span>
+            <!-- Shelf 3: Done & Dusted -->
+            <div class="column-shelf" id="completedColumn">
+                <div class="column-shelf-header">
+                    <div class="shelf-title-group">
+                        <span class="shelf-badge shelf-badge-completed">
+                            <span>✨</span> Done &amp; Dusted
+                        </span>
                     </div>
-                    <span class="column-count" id="completedColCount">0</span>
+                    <span class="shelf-count" id="completedColCount">0</span>
                 </div>
-                <div class="kanban-card-list" id="completedCardList">
+                <div class="cards-stream" id="completedCardList">
                     <!-- Cards populated via app.js -->
                 </div>
             </div>
         </section>
 
-        <!-- View 2: Data Table -->
-        <section class="table-container" id="tableView" style="display: none;">
-            <table class="task-table">
+        <!-- View 2: Pastel Table View -->
+        <section class="table-shelf" id="tableView" style="display: none;">
+            <table class="pastel-table">
                 <thead>
                     <tr>
-                        <th style="width: 40px;">Done</th>
-                        <th>Task</th>
+                        <th style="width: 44px;">Check</th>
+                        <th>Task Name</th>
                         <th>Priority</th>
                         <th>Status</th>
                         <th>Category</th>
                         <th>Due Date</th>
-                        <th style="text-align: right;">Actions</th>
+                        <th style="text-align: right;">Quick Actions</th>
                     </tr>
                 </thead>
                 <tbody id="taskTableBody">
@@ -218,119 +227,129 @@
 
     <!-- Modal: Create / Edit Task -->
     <div class="modal-overlay" id="taskModal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3 id="taskModalTitle">Create New Task</h3>
-                <button type="button" class="btn-ghost-sm" onclick="closeTaskModal()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <div class="modal-dialog">
+            <div class="modal-head">
+                <h3 id="taskModalTitle">✨ Create Task</h3>
+                <button type="button" class="btn-icon-soft" onclick="closeTaskModal()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
             <form id="taskForm">
-                <div class="modal-body">
-                    <div class="form-group">
+                <div class="modal-content">
+                    <div class="field-group">
                         <label for="taskTitle">Task Title *</label>
-                        <input type="text" id="taskTitle" class="form-control" placeholder="e.g. Implement Hibernate JPA caching" required maxlength="150">
+                        <input type="text" id="taskTitle" class="field-control" placeholder="What needs to be accomplished?" required maxlength="150">
                     </div>
 
-                    <div class="form-group">
-                        <label for="taskDescription">Description</label>
-                        <textarea id="taskDescription" class="form-control" placeholder="Provide background, technical details, or acceptance criteria..."></textarea>
+                    <div class="field-group">
+                        <label for="taskDescription">Notes &amp; Details</label>
+                        <textarea id="taskDescription" class="field-control" placeholder="Context, requirements, links or steps..."></textarea>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
+                    <div class="field-row">
+                        <div class="field-group">
                             <label for="taskPriority">Priority</label>
-                            <select id="taskPriority" class="form-control">
-                                <option value="LOW">Low</option>
-                                <option value="MEDIUM" selected>Medium</option>
-                                <option value="HIGH">High</option>
-                                <option value="URGENT">Urgent</option>
+                            <select id="taskPriority" class="field-control">
+                                <option value="LOW">🍃 Low Priority</option>
+                                <option value="MEDIUM" selected>🌱 Medium Priority</option>
+                                <option value="HIGH">⚡ High Priority</option>
+                                <option value="URGENT">🔥 Urgent Attention</option>
                             </select>
                         </div>
 
-                        <div class="form-group">
-                            <label for="taskStatus">Status</label>
-                            <select id="taskStatus" class="form-control">
-                                <option value="PENDING" selected>Pending</option>
-                                <option value="IN_PROGRESS">In Progress</option>
-                                <option value="COMPLETED">Completed</option>
-                                <option value="CANCELLED">Cancelled</option>
+                        <div class="field-group">
+                            <label for="taskStatus">Current Shelf</label>
+                            <select id="taskStatus" class="field-control">
+                                <option value="PENDING" selected>Backlog / To Do</option>
+                                <option value="IN_PROGRESS">In Motion</option>
+                                <option value="COMPLETED">Done &amp; Dusted</option>
+                                <option value="CANCELLED">Archived</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
+                    <div class="field-row">
+                        <div class="field-group">
                             <label for="taskCategory">Category</label>
-                            <select id="taskCategory" class="form-control">
+                            <select id="taskCategory" class="field-control">
                                 <!-- Populated dynamically -->
                             </select>
                         </div>
 
-                        <div class="form-group">
-                            <label for="taskDueDate">Due Date</label>
-                            <input type="date" id="taskDueDate" class="form-control">
+                        <div class="field-group">
+                            <label for="taskDueDate">Target Date</label>
+                            <input type="date" id="taskDueDate" class="field-control">
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-foot">
                     <button type="button" class="btn" onclick="closeTaskModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="saveTaskBtn">Save Task</button>
+                    <button type="submit" class="btn btn-primary" id="saveTaskBtn">Save Task ✨</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal: New Category -->
+    <!-- Modal: Category Manager -->
     <div class="modal-overlay" id="categoryModal">
-        <div class="modal-card" style="max-width: 440px;">
-            <div class="modal-header">
-                <h3>Add New Category</h3>
-                <button type="button" class="btn-ghost-sm" onclick="closeCategoryModal()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <div class="modal-dialog" style="max-width: 460px;">
+            <div class="modal-head">
+                <h3>🏷️ Add Pastel Category</h3>
+                <button type="button" class="btn-icon-soft" onclick="closeCategoryModal()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
             <form id="categoryForm">
-                <div class="modal-body">
-                    <div class="form-group">
+                <div class="modal-content">
+                    <div class="field-group">
                         <label for="categoryName">Category Name *</label>
-                        <input type="text" id="categoryName" class="form-control" placeholder="e.g. Security, Infrastructure" required maxlength="60">
+                        <input type="text" id="categoryName" class="field-control" placeholder="e.g. Design, Mobile, Research" required maxlength="60">
                     </div>
-                    <div class="form-group">
-                        <label for="categoryColor">Color Badge</label>
-                        <input type="color" id="categoryColor" class="form-control" value="#3b82f6" style="height: 40px; padding: 4px; cursor: pointer;">
+                    
+                    <div class="field-group">
+                        <label>Pick a Pastel Accent</label>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;" id="pastelColorSwatches">
+                            <button type="button" class="swatch-btn" data-color="#e9d5ff" style="width: 32px; height: 32px; border-radius: 50%; background: #e9d5ff; border: 2px solid #6b21a8; cursor: pointer;"></button>
+                            <button type="button" class="swatch-btn" data-color="#fed7aa" style="width: 32px; height: 32px; border-radius: 50%; background: #fed7aa; border: 2px solid transparent; cursor: pointer;"></button>
+                            <button type="button" class="swatch-btn" data-color="#a7f3d0" style="width: 32px; height: 32px; border-radius: 50%; background: #a7f3d0; border: 2px solid transparent; cursor: pointer;"></button>
+                            <button type="button" class="swatch-btn" data-color="#bae6fd" style="width: 32px; height: 32px; border-radius: 50%; background: #bae6fd; border: 2px solid transparent; cursor: pointer;"></button>
+                            <button type="button" class="swatch-btn" data-color="#fecdd3" style="width: 32px; height: 32px; border-radius: 50%; background: #fecdd3; border: 2px solid transparent; cursor: pointer;"></button>
+                            <button type="button" class="swatch-btn" data-color="#fef08a" style="width: 32px; height: 32px; border-radius: 50%; background: #fef08a; border: 2px solid transparent; cursor: pointer;"></button>
+                        </div>
+                        <input type="hidden" id="categoryColor" value="#e9d5ff">
                     </div>
-                    <div class="form-group">
-                        <label for="categoryDesc">Description</label>
-                        <input type="text" id="categoryDesc" class="form-control" placeholder="Short description of this category...">
+
+                    <div class="field-group">
+                        <label for="categoryDesc">Short Description</label>
+                        <input type="text" id="categoryDesc" class="field-control" placeholder="Brief note about this workspace tag...">
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-foot">
                     <button type="button" class="btn" onclick="closeCategoryModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Create Category</button>
+                    <button type="submit" class="btn btn-primary">Create Tag 🏷️</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Toast Notification Container -->
-    <div class="toast-container" id="toastContainer"></div>
+    <div class="toast-shelf" id="toastContainer"></div>
 
-    <!-- Footer -->
+    <!-- Soft Footer -->
     <footer class="app-footer">
-        <div class="container" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;">
-            <div>
-                &copy; 2026 Task Manager REST API &bull; Layered Spring MVC Architecture with Hibernate/JPA &amp; MySQL
+        <div class="container" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px;">
+            <div style="font-weight: 500;">
+                Crafted with care &bull; Layered Spring MVC Architecture &bull; Hibernate JPA &bull; MySQL
             </div>
-            <div style="display: flex; gap: 16px;">
-                <a href="/swagger-ui.html" target="_blank" style="color: var(--text-secondary); text-decoration: none;">API Docs</a>
-                <a href="/v3/api-docs" target="_blank" style="color: var(--text-secondary); text-decoration: none;">OpenAPI JSON</a>
-                <a href="/api/v1/dashboard/health" target="_blank" style="color: var(--text-secondary); text-decoration: none;">Health Check</a>
+            <div style="display: flex; gap: 18px; font-weight: 600;">
+                <a href="/swagger-ui.html" target="_blank" style="color: var(--text-muted); text-decoration: none;">API Docs</a>
+                <a href="/v3/api-docs" target="_blank" style="color: var(--text-muted); text-decoration: none;">OpenAPI Spec</a>
+                <a href="/api/v1/dashboard/health" target="_blank" style="color: var(--text-muted); text-decoration: none;">Health Check</a>
             </div>
         </div>
     </footer>
 
-    <!-- App Script -->
+    <!-- Client Script -->
     <script src="/js/app.js"></script>
 </body>
 </html>

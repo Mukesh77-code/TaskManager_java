@@ -1,6 +1,6 @@
 /**
- * TASK MANAGER - MODERN CLIENT APPLICATION
- * Clean vanilla JS ES6+ interacting with Spring Boot REST API
+ * TASKPULSE - ARTISANAL PASTEL TASK STUDIO
+ * Client Script: Dynamic Pastel UI with Spring Boot REST API
  */
 
 const API_BASE = '/api/v1';
@@ -25,7 +25,7 @@ const state = {
     editingTaskId: null
 };
 
-// DOM Elements
+// DOM References
 const elements = {
     totalTasksCount: document.getElementById('totalTasksCount'),
     inProgressCount: document.getElementById('inProgressCount'),
@@ -49,65 +49,114 @@ const elements = {
     categoryModal: document.getElementById('categoryModal'),
     categoryForm: document.getElementById('categoryForm'),
     toastContainer: document.getElementById('toastContainer'),
-    themeToggleBtn: document.getElementById('themeToggleBtn')
+    themeToggleBtn: document.getElementById('themeToggleBtn'),
+    quickTaskInput: document.getElementById('quickTaskInput'),
+    liveGreetingText: document.getElementById('liveGreetingText')
 };
 
-// Initialize Application
+// Initialize App
 document.addEventListener('DOMContentLoaded', () => {
+    initGreeting();
     initTheme();
     setupEventListeners();
+    setupColorSwatches();
     loadAllData();
 });
 
+// Dynamic Greeting
+function initGreeting() {
+    if (!elements.liveGreetingText) return;
+    const hour = new Date().getHours();
+    let greeting = 'Good day, Maker ✨';
+    if (hour >= 5 && hour < 12) greeting = 'Good morning, Maker ☕';
+    else if (hour >= 12 && hour < 17) greeting = 'Good afternoon, Maker 🌤️';
+    else if (hour >= 17 && hour < 22) greeting = 'Good evening, Maker 🌙';
+    else greeting = 'Night owl mode ✨';
+    elements.liveGreetingText.textContent = greeting;
+}
+
 // Theme handling
 function initTheme() {
-    const saved = localStorage.getItem('task_manager_theme') || 'dark';
+    const saved = localStorage.getItem('task_manager_theme') || 'light';
     document.documentElement.setAttribute('data-theme', saved);
 }
 
 function toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
     const next = current === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('task_manager_theme', next);
+    showToast(next === 'dark' ? 'Switched to Midnight Plum theme 🌙' : 'Switched to Cream Pastel theme 🌸', 'info');
 }
 
-// Event Listeners
+// Color Swatches in Category Modal
+function setupColorSwatches() {
+    const swatches = document.querySelectorAll('.swatch-btn');
+    const colorInput = document.getElementById('categoryColor');
+    swatches.forEach(btn => {
+        btn.addEventListener('click', () => {
+            swatches.forEach(s => s.style.borderColor = 'transparent');
+            btn.style.borderColor = '#1f1c18';
+            if (colorInput) colorInput.value = btn.dataset.color;
+        });
+    });
+}
+
+// Setup Event Listeners
 function setupEventListeners() {
     // Theme toggle
     if (elements.themeToggleBtn) {
         elements.themeToggleBtn.addEventListener('click', toggleTheme);
     }
 
-    // Search input debounce
+    // Quick Composer (Brain Dump)
+    if (elements.quickTaskInput) {
+        elements.quickTaskInput.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter' && elements.quickTaskInput.value.trim()) {
+                e.preventDefault();
+                await handleQuickAdd(elements.quickTaskInput.value.trim());
+                elements.quickTaskInput.value = '';
+            }
+        });
+    }
+
+    // Search input with debounce
     let searchTimeout;
-    elements.searchInput.addEventListener('input', (e) => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            state.filters.search = e.target.value.trim();
-            state.filters.page = 0;
-            fetchTasks();
-        }, 300);
-    });
+    if (elements.searchInput) {
+        elements.searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                state.filters.search = e.target.value.trim();
+                state.filters.page = 0;
+                fetchTasks();
+            }, 300);
+        });
+    }
 
     // Filters
-    elements.statusFilter.addEventListener('change', (e) => {
-        state.filters.status = e.target.value;
-        state.filters.page = 0;
-        fetchTasks();
-    });
+    if (elements.statusFilter) {
+        elements.statusFilter.addEventListener('change', (e) => {
+            state.filters.status = e.target.value;
+            state.filters.page = 0;
+            fetchTasks();
+        });
+    }
 
-    elements.priorityFilter.addEventListener('change', (e) => {
-        state.filters.priority = e.target.value;
-        state.filters.page = 0;
-        fetchTasks();
-    });
+    if (elements.priorityFilter) {
+        elements.priorityFilter.addEventListener('change', (e) => {
+            state.filters.priority = e.target.value;
+            state.filters.page = 0;
+            fetchTasks();
+        });
+    }
 
-    elements.categoryFilter.addEventListener('change', (e) => {
-        state.filters.categoryId = e.target.value;
-        state.filters.page = 0;
-        fetchTasks();
-    });
+    if (elements.categoryFilter) {
+        elements.categoryFilter.addEventListener('change', (e) => {
+            state.filters.categoryId = e.target.value;
+            state.filters.page = 0;
+            fetchTasks();
+        });
+    }
 
     if (elements.overdueOnlyFilter) {
         elements.overdueOnlyFilter.addEventListener('change', (e) => {
@@ -117,15 +166,15 @@ function setupEventListeners() {
         });
     }
 
-    // View switcher
-    elements.kanbanBtn.addEventListener('click', () => switchView('kanban'));
-    elements.tableBtn.addEventListener('click', () => switchView('table'));
+    // View switchers
+    if (elements.kanbanBtn) elements.kanbanBtn.addEventListener('click', () => switchView('kanban'));
+    if (elements.tableBtn) elements.tableBtn.addEventListener('click', () => switchView('table'));
 
     // Forms
-    elements.taskForm.addEventListener('submit', handleTaskSubmit);
-    elements.categoryForm.addEventListener('submit', handleCategorySubmit);
+    if (elements.taskForm) elements.taskForm.addEventListener('submit', handleTaskSubmit);
+    if (elements.categoryForm) elements.categoryForm.addEventListener('submit', handleCategorySubmit);
 
-    // Global Keyboard shortcuts
+    // Global Hotkeys
     window.addEventListener('keydown', (e) => {
         if (e.key === 'n' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
             e.preventDefault();
@@ -163,7 +212,7 @@ async function loadAllData() {
 async function fetchStats() {
     try {
         const res = await fetch(`${API_BASE}/dashboard/stats`);
-        if (!res.ok) throw new Error('Failed to load statistics');
+        if (!res.ok) throw new Error('Failed to load stats');
         const json = await res.json();
         if (json.success && json.data) {
             state.stats = json.data;
@@ -202,7 +251,7 @@ async function fetchTasks() {
         params.append('sortDir', state.filters.sortDir);
 
         const res = await fetch(`${API_BASE}/tasks?${params.toString()}`);
-        if (!res.ok) throw new Error('Failed to retrieve tasks');
+        if (!res.ok) throw new Error('Failed to load tasks');
         const json = await res.json();
 
         if (json.success && json.data) {
@@ -211,36 +260,71 @@ async function fetchTasks() {
         }
     } catch (err) {
         console.error('Fetch tasks error:', err);
-        showToast('Error fetching tasks from server', 'error');
+        showToast('Could not sync tasks with server', 'error');
     }
 }
 
-// Rendering Functions
+// Quick Add Handler
+async function handleQuickAdd(title) {
+    try {
+        const payload = {
+            title,
+            description: null,
+            priority: 'MEDIUM',
+            status: 'PENDING',
+            dueDate: null,
+            categoryId: state.categories.length ? state.categories[0].id : null
+        };
+
+        const res = await fetch(`${API_BASE}/tasks`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const json = await res.json();
+        if (!res.ok || !json.success) throw new Error(json.message || 'Error creating task');
+
+        showToast(`🌱 Added "${title}" to your Backlog!`, 'success');
+        await Promise.all([fetchTasks(), fetchStats()]);
+    } catch (err) {
+        console.error('Quick add error:', err);
+        showToast(err.message, 'error');
+    }
+}
+
+// Render Stats
 function renderStats() {
     if (!state.stats) return;
     const { totalTasks, inProgressTasks, completedTasks, overdueTasks, completionRate } = state.stats;
-    elements.totalTasksCount.textContent = totalTasks;
-    elements.inProgressCount.textContent = inProgressTasks;
-    elements.completedCount.textContent = completedTasks;
-    elements.overdueCount.textContent = overdueTasks;
-    elements.completionRateText.textContent = `${completionRate}% Completion`;
-    elements.completionProgressBar.style.width = `${Math.min(100, completionRate)}%`;
+    if (elements.totalTasksCount) elements.totalTasksCount.textContent = totalTasks;
+    if (elements.inProgressCount) elements.inProgressCount.textContent = inProgressTasks;
+    if (elements.completedCount) elements.completedCount.textContent = completedTasks;
+    if (elements.overdueCount) elements.overdueCount.textContent = overdueTasks;
+    if (elements.completionRateText) elements.completionRateText.textContent = `${completionRate}% Done & Dusted`;
+    if (elements.completionProgressBar) elements.completionProgressBar.style.width = `${Math.min(100, completionRate)}%`;
 }
 
+// Render Category Dropdowns
 function renderCategorySelects() {
     // Filter dropdown
     const filterOptions = state.categories.map(c => 
         `<option value="${c.id}">${escapeHtml(c.name)} (${c.taskCount || 0})</option>`
     ).join('');
-    elements.categoryFilter.innerHTML = '<option value="">All Categories</option>' + filterOptions;
+    if (elements.categoryFilter) {
+        elements.categoryFilter.innerHTML = '<option value="">Category: All</option>' + filterOptions;
+    }
 
     // Modal select
     const modalOptions = state.categories.map(c => 
         `<option value="${c.id}">${escapeHtml(c.name)}</option>`
     ).join('');
-    elements.taskCategorySelect.innerHTML = '<option value="">Select Category (Optional)</option>' + modalOptions;
+    if (elements.taskCategorySelect) {
+        elements.taskCategorySelect.innerHTML = '<option value="">Select a Category (Optional)</option>' + modalOptions;
+    }
 }
 
+// Render Tasks
 function renderTasks() {
     if (state.viewMode === 'kanban') {
         renderKanban();
@@ -262,75 +346,87 @@ function renderKanban() {
     const progressTasks = state.tasks.filter(t => t.status === 'IN_PROGRESS');
     const completedTasks = state.tasks.filter(t => t.status === 'COMPLETED');
 
-    pendingCount.textContent = pendingTasks.length;
-    progressCount.textContent = progressTasks.length;
-    completedCount.textContent = completedTasks.length;
+    if (pendingCount) pendingCount.textContent = pendingTasks.length;
+    if (progressCount) progressCount.textContent = progressTasks.length;
+    if (completedCount) completedCount.textContent = completedTasks.length;
 
-    pendingList.innerHTML = pendingTasks.length ? pendingTasks.map(createTaskCardHtml).join('') : getEmptyColumnHtml('No pending tasks');
-    progressList.innerHTML = progressTasks.length ? progressTasks.map(createTaskCardHtml).join('') : getEmptyColumnHtml('No active tasks');
-    completedList.innerHTML = completedTasks.length ? completedTasks.map(createTaskCardHtml).join('') : getEmptyColumnHtml('No completed tasks');
+    if (pendingList) {
+        pendingList.innerHTML = pendingTasks.length 
+            ? pendingTasks.map(createTaskTicketHtml).join('') 
+            : '<div class="empty-shelf">No tasks here yet... Add one! ✨</div>';
+    }
+    if (progressList) {
+        progressList.innerHTML = progressTasks.length 
+            ? progressTasks.map(createTaskTicketHtml).join('') 
+            : '<div class="empty-shelf">Nothing in motion right now ☕</div>';
+    }
+    if (completedList) {
+        completedList.innerHTML = completedTasks.length 
+            ? completedTasks.map(createTaskTicketHtml).join('') 
+            : '<div class="empty-shelf">Complete a task to celebrate here! 🌸</div>';
+    }
 }
 
-function getEmptyColumnHtml(msg) {
-    return `<div class="empty-state" style="padding: 24px 10px; font-size: 12px;">${msg}</div>`;
-}
-
-function createTaskCardHtml(task) {
+function createTaskTicketHtml(task) {
     const isCompleted = task.status === 'COMPLETED';
     const isOverdue = task.overdue;
 
-    let priorityBadgeClass = 'badge-priority-medium';
-    if (task.priority === 'URGENT') priorityBadgeClass = 'badge-priority-urgent';
-    else if (task.priority === 'HIGH') priorityBadgeClass = 'badge-priority-high';
-    else if (task.priority === 'LOW') priorityBadgeClass = 'badge-priority-low';
+    let priorityTag = '<span class="pastel-tag tag-medium">🌱 Medium</span>';
+    if (task.priority === 'URGENT') priorityTag = '<span class="pastel-tag tag-urgent">🔥 Urgent</span>';
+    else if (task.priority === 'HIGH') priorityTag = '<span class="pastel-tag tag-high">⚡ High</span>';
+    else if (task.priority === 'LOW') priorityTag = '<span class="pastel-tag tag-low">🍃 Low</span>';
 
     const categoryHtml = task.category 
-        ? `<span class="badge badge-category" style="border-left: 3px solid ${task.category.color || '#3b82f6'};">${escapeHtml(task.category.name)}</span>`
-        : '';
-
-    const dueHtml = task.dueDate 
-        ? `<span class="badge badge-due ${isOverdue ? 'is-overdue' : ''}">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            ${isOverdue ? 'Overdue: ' : ''}${task.dueDate}
+        ? `<span class="pastel-tag tag-category" style="background-color: ${task.category.color ? task.category.color + '26' : 'var(--bg-subtle)'}; border-color: ${task.category.color || 'var(--border-medium)'};">
+            ${escapeHtml(task.category.name)}
            </span>`
         : '';
 
+    // Humanized Due Date
+    let dueHtml = '';
+    if (task.dueDate) {
+        const today = new Date().toISOString().split('T')[0];
+        let humanLabel = task.dueDate;
+        if (task.dueDate === today) humanLabel = 'Due Today ☕';
+        dueHtml = `<span class="pastel-tag tag-due ${isOverdue ? 'is-overdue' : ''}">
+            ${isOverdue ? '⏳ Overdue: ' : '📅 '}${humanLabel}
+        </span>`;
+    }
+
     return `
-    <div class="task-card ${isCompleted ? 'is-completed' : ''}" data-id="${task.id}">
-        <div class="task-card-header">
-            <h4 class="task-title" onclick="openEditTaskModal(${task.id})">${escapeHtml(task.title)}</h4>
+    <div class="task-ticket ${isCompleted ? 'is-completed' : ''}" data-id="${task.id}">
+        <div class="ticket-header">
+            <h4 class="ticket-title" onclick="openEditTaskModal(${task.id})">${escapeHtml(task.title)}</h4>
         </div>
-        ${task.description ? `<p class="task-desc">${escapeHtml(task.description)}</p>` : ''}
-        <div class="task-card-meta">
-            <span class="badge ${priorityBadgeClass}">${task.priority}</span>
+        ${task.description ? `<p class="ticket-body">${escapeHtml(task.description)}</p>` : ''}
+        <div class="ticket-tags-row">
+            ${priorityTag}
             ${categoryHtml}
             ${dueHtml}
         </div>
-        <div class="task-card-footer">
-            <div class="task-status-actions">
+        <div class="ticket-footer">
+            <div class="ticket-actions-left">
                 ${task.status !== 'COMPLETED' ? `
-                    <button class="btn-ghost-sm" onclick="quickUpdateStatus(${task.id}, 'COMPLETED')">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        Done
+                    <button class="btn-pill-action btn-done" onclick="quickUpdateStatus(${task.id}, 'COMPLETED')">
+                        <span>✨ Mark Done</span>
                     </button>
                 ` : `
-                    <button class="btn-ghost-sm" onclick="quickUpdateStatus(${task.id}, 'IN_PROGRESS')">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
-                        Reopen
+                    <button class="btn-pill-action btn-reopen" onclick="quickUpdateStatus(${task.id}, 'IN_PROGRESS')">
+                        <span>↩ Reopen</span>
                     </button>
                 `}
                 ${task.status === 'PENDING' ? `
-                    <button class="btn-ghost-sm" onclick="quickUpdateStatus(${task.id}, 'IN_PROGRESS')">
-                        Start
+                    <button class="btn-pill-action" onclick="quickUpdateStatus(${task.id}, 'IN_PROGRESS')">
+                        <span>Start ⚡</span>
                     </button>
                 ` : ''}
             </div>
-            <div class="task-card-actions">
-                <button class="btn-ghost-sm" title="Edit" onclick="openEditTaskModal(${task.id})">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <div class="ticket-actions-right">
+                <button class="btn-icon-soft" title="Edit Task" onclick="openEditTaskModal(${task.id})">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </button>
-                <button class="btn-ghost-sm btn-danger" title="Delete" onclick="deleteTask(${task.id})">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <button class="btn-icon-soft btn-trash" title="Delete Task" onclick="deleteTask(${task.id})">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 </button>
             </div>
         </div>
@@ -340,47 +436,47 @@ function createTaskCardHtml(task) {
 
 function renderTable() {
     const tbody = document.getElementById('taskTableBody');
+    if (!tbody) return;
+
     if (!state.tasks.length) {
-        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">No matching tasks found.</div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-shelf">No matching tasks found.</div></td></tr>`;
         return;
     }
 
     tbody.innerHTML = state.tasks.map(task => {
-        let priorityBadgeClass = 'badge-priority-medium';
-        if (task.priority === 'URGENT') priorityBadgeClass = 'badge-priority-urgent';
-        else if (task.priority === 'HIGH') priorityBadgeClass = 'badge-priority-high';
-        else if (task.priority === 'LOW') priorityBadgeClass = 'badge-priority-low';
+        let priorityTag = '<span class="pastel-tag tag-medium">🌱 Medium</span>';
+        if (task.priority === 'URGENT') priorityTag = '<span class="pastel-tag tag-urgent">🔥 Urgent</span>';
+        else if (task.priority === 'HIGH') priorityTag = '<span class="pastel-tag tag-high">⚡ High</span>';
+        else if (task.priority === 'LOW') priorityTag = '<span class="pastel-tag tag-low">🍃 Low</span>';
 
         return `
         <tr>
-            <td style="width: 40px;">
+            <td style="width: 44px;">
                 <input type="checkbox" ${task.status === 'COMPLETED' ? 'checked' : ''} 
                        onchange="quickUpdateStatus(${task.id}, this.checked ? 'COMPLETED' : 'IN_PROGRESS')" 
-                       style="cursor: pointer; accent-color: #10b981;">
+                       style="cursor: pointer; width: 18px; height: 18px; accent-color: #059669;">
             </td>
             <td>
-                <div style="font-weight: 600; cursor: pointer;" onclick="openEditTaskModal(${task.id})">
+                <div style="font-weight: 700; cursor: pointer; color: var(--text-main);" onclick="openEditTaskModal(${task.id})">
                     ${escapeHtml(task.title)}
                 </div>
-                ${task.description ? `<div style="font-size: 11px; color: var(--text-muted);">${escapeHtml(task.description).substring(0, 70)}...</div>` : ''}
+                ${task.description ? `<div style="font-size: 11px; color: var(--text-muted);">${escapeHtml(task.description).substring(0, 65)}...</div>` : ''}
+            </td>
+            <td>${priorityTag}</td>
+            <td>
+                <span class="pastel-tag tag-category">${task.status}</span>
             </td>
             <td>
-                <span class="badge ${priorityBadgeClass}">${task.priority}</span>
+                ${task.category ? `<span class="pastel-tag tag-category" style="border-left: 3px solid ${task.category.color || '#fed7aa'};">${escapeHtml(task.category.name)}</span>` : '-'}
             </td>
             <td>
-                <span class="badge" style="background: rgba(255,255,255,0.06);">${task.status}</span>
-            </td>
-            <td>
-                ${task.category ? `<span class="badge badge-category" style="border-left: 3px solid ${task.category.color || '#3b82f6'};">${escapeHtml(task.category.name)}</span>` : '-'}
-            </td>
-            <td>
-                <span style="font-size: 12px; ${task.overdue ? 'color: #f87171; font-weight: 600;' : ''}">
+                <span style="font-size: 12px; font-weight: 600; ${task.overdue ? 'color: #e11d48;' : ''}">
                     ${task.dueDate || '-'}
                 </span>
             </td>
             <td style="text-align: right;">
-                <button class="btn-ghost-sm" onclick="openEditTaskModal(${task.id})">Edit</button>
-                <button class="btn-ghost-sm btn-danger" onclick="deleteTask(${task.id})">Delete</button>
+                <button class="btn-pill-action" onclick="openEditTaskModal(${task.id})">Edit</button>
+                <button class="btn-pill-action" style="color: #e11d48;" onclick="deleteTask(${task.id})">Delete</button>
             </td>
         </tr>
         `;
@@ -390,7 +486,7 @@ function renderTable() {
 // Modal Handlers
 function openCreateTaskModal() {
     state.editingTaskId = null;
-    elements.taskModalTitle.textContent = 'Create New Task';
+    elements.taskModalTitle.textContent = '✨ Create Task';
     elements.taskForm.reset();
     document.getElementById('taskPriority').value = 'MEDIUM';
     document.getElementById('taskStatus').value = 'PENDING';
@@ -403,7 +499,7 @@ function openEditTaskModal(id) {
     if (!task) return;
 
     state.editingTaskId = id;
-    elements.taskModalTitle.textContent = 'Edit Task';
+    elements.taskModalTitle.textContent = '📝 Edit Task';
     document.getElementById('taskTitle').value = task.title;
     document.getElementById('taskDescription').value = task.description || '';
     document.getElementById('taskPriority').value = task.priority;
@@ -446,18 +542,11 @@ async function handleTaskSubmit(e) {
     const categoryId = categoryIdVal ? Number(categoryIdVal) : null;
 
     if (!title) {
-        showToast('Please enter a task title', 'error');
+        showToast('Please provide a task title 🌸', 'error');
         return;
     }
 
-    const payload = {
-        title,
-        description,
-        priority,
-        status,
-        dueDate,
-        categoryId
-    };
+    const payload = { title, description, priority, status, dueDate, categoryId };
 
     try {
         let res;
@@ -476,11 +565,9 @@ async function handleTaskSubmit(e) {
         }
 
         const json = await res.json();
-        if (!res.ok || !json.success) {
-            throw new Error(json.message || 'Error saving task');
-        }
+        if (!res.ok || !json.success) throw new Error(json.message || 'Error saving task');
 
-        showToast(state.editingTaskId ? 'Task updated successfully' : 'Task created successfully', 'success');
+        showToast(state.editingTaskId ? 'Task updated cleanly ✨' : 'Task added to board 🌸', 'success');
         closeTaskModal();
         await Promise.all([fetchTasks(), fetchStats()]);
     } catch (err) {
@@ -497,10 +584,14 @@ async function quickUpdateStatus(taskId, newStatus) {
             body: JSON.stringify({ status: newStatus })
         });
         const json = await res.json();
-        if (!res.ok || !json.success) {
-            throw new Error(json.message || 'Failed to update status');
+        if (!res.ok || !json.success) throw new Error(json.message || 'Failed to update status');
+
+        if (newStatus === 'COMPLETED') {
+            showToast('🎉 Celebrated and Done! Great work!', 'success');
+        } else {
+            showToast(`Task moved to ${newStatus} ✨`, 'info');
         }
-        showToast(`Task status updated to ${newStatus}`, 'success');
+
         await Promise.all([fetchTasks(), fetchStats()]);
     } catch (err) {
         console.error('Status patch error:', err);
@@ -509,17 +600,14 @@ async function quickUpdateStatus(taskId, newStatus) {
 }
 
 async function deleteTask(taskId) {
-    if (!confirm('Are you sure you want to delete this task?')) return;
+    if (!confirm('Are you sure you want to remove this task?')) return;
 
     try {
-        const res = await fetch(`${API_BASE}/tasks/${taskId}`, {
-            method: 'DELETE'
-        });
+        const res = await fetch(`${API_BASE}/tasks/${taskId}`, { method: 'DELETE' });
         const json = await res.json();
-        if (!res.ok || !json.success) {
-            throw new Error(json.message || 'Failed to delete task');
-        }
-        showToast('Task deleted successfully', 'info');
+        if (!res.ok || !json.success) throw new Error(json.message || 'Failed to delete task');
+
+        showToast('Task removed from board 🍃', 'info');
         await Promise.all([fetchTasks(), fetchStats()]);
     } catch (err) {
         console.error('Delete error:', err);
@@ -545,11 +633,9 @@ async function handleCategorySubmit(e) {
             body: JSON.stringify({ name, color, description })
         });
         const json = await res.json();
-        if (!res.ok || !json.success) {
-            throw new Error(json.message || 'Error creating category');
-        }
+        if (!res.ok || !json.success) throw new Error(json.message || 'Error creating category');
 
-        showToast(`Category "${name}" created!`, 'success');
+        showToast(`Pastel tag "${name}" created! 🏷️`, 'success');
         closeCategoryModal();
         await fetchCategories();
     } catch (err) {
@@ -558,29 +644,25 @@ async function handleCategorySubmit(e) {
     }
 }
 
-// Toast Notifications
+// Toast System
 function showToast(message, type = 'info') {
     const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
+    toast.className = `toast-bubble toast-${type}`;
     
-    let iconSvg = '';
-    if (type === 'success') {
-        iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
-    } else if (type === 'error') {
-        iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
-    } else {
-        iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
-    }
+    let emoji = '🌸';
+    if (type === 'success') emoji = '✨';
+    else if (type === 'error') emoji = '⚠️';
+    else if (type === 'info') emoji = '💡';
 
-    toast.innerHTML = `${iconSvg} <span>${escapeHtml(message)}</span>`;
-    elements.toastContainer.appendChild(toast);
+    toast.innerHTML = `<span style="font-size: 16px;">${emoji}</span> <span>${escapeHtml(message)}</span>`;
+    if (elements.toastContainer) elements.toastContainer.appendChild(toast);
 
     setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transform = 'translateX(100%)';
+        toast.style.transform = 'translateY(10px)';
         toast.style.transition = 'all 0.3s ease';
         setTimeout(() => toast.remove(), 300);
-    }, 3500);
+    }, 3600);
 }
 
 // Utility
@@ -597,7 +679,7 @@ function escapeHtml(str) {
     );
 }
 
-// Export functions to window for onclick handlers
+// Window bindings
 window.openCreateTaskModal = openCreateTaskModal;
 window.openEditTaskModal = openEditTaskModal;
 window.closeTaskModal = closeTaskModal;
