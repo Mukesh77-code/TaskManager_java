@@ -1,0 +1,499 @@
+{
+  "info": {
+    "_postman_id": "7b8319f3-96b5-4f4c-8367-932d8471e8bf",
+    "name": "Task Manager REST API",
+    "description": "Comprehensive Postman Test Collection for Spring Boot Task Manager REST API.\nCovers CRUD, pagination, filtering, status transitions, validation errors, and analytics.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Tasks CRUD",
+      "item": [
+        {
+          "name": "Get All Tasks (Default Paginated)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has success boolean and page content\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.content).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tasks?page=0&size=10&sortBy=createdAt&sortDir=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" },
+                { "key": "sortBy", "value": "createdAt" },
+                { "key": "sortDir", "value": "desc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create New Task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Task created with ID and PENDING status\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.id).to.be.a('number');",
+                  "    pm.expect(json.data.title).to.eql(\"Implement JWT Authentication Filter\");",
+                  "    pm.environment.set(\"taskId\", json.data.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Implement JWT Authentication Filter\",\n  \"description\": \"Add security configuration and bearer token extraction using Spring Security 6.\",\n  \"status\": \"PENDING\",\n  \"priority\": \"HIGH\",\n  \"dueDate\": \"2026-12-01\",\n  \"categoryId\": {{categoryId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks"]
+            }
+          }
+        },
+        {
+          "name": "Get Task By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Task ID matches requested taskId\", function () {",
+                  "    pm.expect(json.data.id).to.eql(Number(pm.environment.get(\"taskId\")));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Task By ID (Full PUT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Task updated with new priority and status\", function () {",
+                  "    pm.expect(json.data.priority).to.eql(\"URGENT\");",
+                  "    pm.expect(json.data.status).to.eql(\"IN_PROGRESS\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Implement JWT Authentication & Refresh Tokens\",\n  \"description\": \"Updated scope to also include refresh token rotation and logout revocation.\",\n  \"status\": \"IN_PROGRESS\",\n  \"priority\": \"URGENT\",\n  \"dueDate\": \"2026-12-05\",\n  \"categoryId\": {{categoryId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Task By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Success message indicates deletion\", function () {",
+                  "    pm.expect(json.success).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "{{taskId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Filtering, Search & Pagination",
+      "item": [
+        {
+          "name": "Filter By Status (IN_PROGRESS)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/tasks?status=IN_PROGRESS",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks"],
+              "query": [{ "key": "status", "value": "IN_PROGRESS" }]
+            }
+          }
+        },
+        {
+          "name": "Filter By Priority (URGENT)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/tasks?priority=URGENT",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks"],
+              "query": [{ "key": "priority", "value": "URGENT" }]
+            }
+          }
+        },
+        {
+          "name": "Search by Keyword ('MySQL')",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/tasks?search=MySQL",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks"],
+              "query": [{ "key": "search", "value": "MySQL" }]
+            }
+          }
+        },
+        {
+          "name": "Get Overdue Tasks Only",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/tasks?overdueOnly=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks"],
+              "query": [{ "key": "overdueOnly", "value": "true" }]
+            }
+          }
+        },
+        {
+          "name": "Custom Sorting by Due Date ASC",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/tasks?sortBy=dueDate&sortDir=asc&page=0&size=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks"],
+              "query": [
+                { "key": "sortBy", "value": "dueDate" },
+                { "key": "sortDir", "value": "asc" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "5" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Status Transitions (PATCH)",
+      "item": [
+        {
+          "name": "Patch Status to COMPLETED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Task status changed to COMPLETED\", function () {",
+                  "    pm.expect(json.data.status).to.eql(\"COMPLETED\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"COMPLETED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "1", "status"]
+            }
+          }
+        },
+        {
+          "name": "Patch Status to IN_PROGRESS",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_PROGRESS\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "1", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"]
+            }
+          }
+        },
+        {
+          "name": "Create New Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.id) {",
+                  "    pm.environment.set(\"newCategoryId\", json.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cloud Infrastructure\",\n  \"color\": \"#0EA5E9\",\n  \"description\": \"Kubernetes clusters, GCP, AWS and Terraform\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Dashboard & Analytics",
+      "item": [
+        {
+          "name": "Get Dashboard Metrics & Aggregate Counts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Metrics structure contains total, completed, overdue, and rate\", function () {",
+                  "    pm.expect(json.data.totalTasks).to.be.a('number');",
+                  "    pm.expect(json.data.completionRate).to.be.a('number');",
+                  "    pm.expect(json.data.tasksByStatus).to.be.an('object');",
+                  "    pm.expect(json.data.tasksByPriority).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "stats"]
+            }
+          }
+        },
+        {
+          "name": "System Health Check",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Validation & Error Handling",
+      "item": [
+        {
+          "name": "Validation Error - Blank Title (Expect 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Field validation errors returned\", function () {",
+                  "    pm.expect(json.validationErrors).to.be.an('object');",
+                  "    pm.expect(json.validationErrors.title).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"\",\n  \"description\": \"Invalid task with missing title\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks"]
+            }
+          }
+        },
+        {
+          "name": "Not Found Error - Non-existent ID (Expect 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404 Not Found\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Error message indicates missing resource\", function () {",
+                  "    pm.expect(json.error).to.eql(\"Not Found\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/999999",
+              "host": ["{{baseUrl}}"],
+              "path": ["tasks", "999999"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

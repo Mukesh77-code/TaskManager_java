@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskPulse // Spring Boot REST API Task Manager</title>
+    <meta name="description" content="Production-ready Task Management REST API with Spring Boot, JPA, MySQL, and modern UI">
+    <link rel="stylesheet" href="/css/styles.css">
+    <!-- Modern Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="app-header">
+        <div class="container header-content">
+            <a href="/" class="logo-group">
+                <div class="logo-icon">⚡</div>
+                <div class="logo-text">
+                    <h1>TaskPulse <span class="logo-badge">Spring Boot 3</span></h1>
+                    <p>REST API &bull; MySQL &bull; JPA &bull; Maven</p>
+                </div>
+            </a>
+
+            <div class="header-center">
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span>API LIVE &bull; 8080</span>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <a href="/swagger-ui.html" target="_blank" class="btn" title="Open Swagger OpenAPI Documentation">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    Swagger UI
+                </a>
+                <button type="button" class="btn" onclick="openCategoryModal()" title="Manage Categories">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                    Categories
+                </button>
+                <button type="button" class="btn btn-icon" id="themeToggleBtn" title="Toggle Light/Dark Theme">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                </button>
+                <button type="button" class="btn btn-primary" onclick="openCreateTaskModal()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    New Task
+                    <kbd>N</kbd>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="container" style="padding-top: 10px; padding-bottom: 40px;">
+
+        <!-- Analytics Overview Bar -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Total Tasks</span>
+                    <div class="stat-icon icon-blue">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    </div>
+                </div>
+                <div class="stat-value" id="totalTasksCount">-</div>
+                <div class="stat-meta">Across all categories</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">In Progress</span>
+                    <div class="stat-icon icon-amber">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                </div>
+                <div class="stat-value" id="inProgressCount">-</div>
+                <div class="stat-meta">Active sprint execution</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Completed</span>
+                    <div class="stat-icon icon-emerald">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                </div>
+                <div class="stat-value" id="completedCount">-</div>
+                <div class="stat-progress">
+                    <div class="stat-progress-bar" id="completionProgressBar" style="width: 0%;"></div>
+                </div>
+                <div class="stat-meta" id="completionRateText">0% Completion</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Overdue Alerts</span>
+                    <div class="stat-icon icon-rose">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </div>
+                </div>
+                <div class="stat-value" id="overdueCount">-</div>
+                <div class="stat-meta">Action required</div>
+            </div>
+        </section>
+
+        <!-- Filters & Toolbar -->
+        <section class="controls-bar">
+            <div class="search-box">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search tasks by title or description... (Press /)">
+            </div>
+
+            <div class="filters-group">
+                <select id="statusFilter" class="select-filter">
+                    <option value="">All Statuses</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="CANCELLED">Cancelled</option>
+                </select>
+
+                <select id="priorityFilter" class="select-filter">
+                    <option value="">All Priorities</option>
+                    <option value="URGENT">Urgent</option>
+                    <option value="HIGH">High</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="LOW">Low</option>
+                </select>
+
+                <select id="categoryFilter" class="select-filter">
+                    <option value="">All Categories</option>
+                </select>
+
+                <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); cursor: pointer; margin-left: 4px;">
+                    <input type="checkbox" id="overdueOnlyFilter" style="accent-color: #ef4444; cursor: pointer;">
+                    Overdue Only
+                </label>
+            </div>
+
+            <div class="view-toggle">
+                <button type="button" class="view-btn active" id="kanbanBtn">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
+                    Kanban
+                </button>
+                <button type="button" class="view-btn" id="tableBtn">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    Table
+                </button>
+            </div>
+        </section>
+
+        <!-- View 1: Kanban Board -->
+        <section class="kanban-grid" id="kanbanView">
+            <!-- Column 1: Pending -->
+            <div class="kanban-column" id="pendingColumn">
+                <div class="kanban-column-header">
+                    <div class="column-title-group">
+                        <span class="column-dot dot-pending"></span>
+                        <span class="column-title">To Do / Pending</span>
+                    </div>
+                    <span class="column-count" id="pendingColCount">0</span>
+                </div>
+                <div class="kanban-card-list" id="pendingCardList">
+                    <!-- Cards populated via app.js -->
+                </div>
+            </div>
+
+            <!-- Column 2: In Progress -->
+            <div class="kanban-column" id="progressColumn">
+                <div class="kanban-column-header">
+                    <div class="column-title-group">
+                        <span class="column-dot dot-progress"></span>
+                        <span class="column-title">In Progress</span>
+                    </div>
+                    <span class="column-count" id="progressColCount">0</span>
+                </div>
+                <div class="kanban-card-list" id="progressCardList">
+                    <!-- Cards populated via app.js -->
+                </div>
+            </div>
+
+            <!-- Column 3: Completed -->
+            <div class="kanban-column" id="completedColumn">
+                <div class="kanban-column-header">
+                    <div class="column-title-group">
+                        <span class="column-dot dot-completed"></span>
+                        <span class="column-title">Completed</span>
+                    </div>
+                    <span class="column-count" id="completedColCount">0</span>
+                </div>
+                <div class="kanban-card-list" id="completedCardList">
+                    <!-- Cards populated via app.js -->
+                </div>
+            </div>
+        </section>
+
+        <!-- View 2: Data Table -->
+        <section class="table-container" id="tableView" style="display: none;">
+            <table class="task-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40px;">Done</th>
+                        <th>Task</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Category</th>
+                        <th>Due Date</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="taskTableBody">
+                    <!-- Populated via app.js -->
+                </tbody>
+            </table>
+        </section>
+
+    </main>
+
+    <!-- Modal: Create / Edit Task -->
+    <div class="modal-overlay" id="taskModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="taskModalTitle">Create New Task</h3>
+                <button type="button" class="btn-ghost-sm" onclick="closeTaskModal()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <form id="taskForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="taskTitle">Task Title *</label>
+                        <input type="text" id="taskTitle" class="form-control" placeholder="e.g. Implement Hibernate JPA caching" required maxlength="150">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="taskDescription">Description</label>
+                        <textarea id="taskDescription" class="form-control" placeholder="Provide background, technical details, or acceptance criteria..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskPriority">Priority</label>
+                            <select id="taskPriority" class="form-control">
+                                <option value="LOW">Low</option>
+                                <option value="MEDIUM" selected>Medium</option>
+                                <option value="HIGH">High</option>
+                                <option value="URGENT">Urgent</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taskStatus">Status</label>
+                            <select id="taskStatus" class="form-control">
+                                <option value="PENDING" selected>Pending</option>
+                                <option value="IN_PROGRESS">In Progress</option>
+                                <option value="COMPLETED">Completed</option>
+                                <option value="CANCELLED">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taskCategory">Category</label>
+                            <select id="taskCategory" class="form-control">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="taskDueDate">Due Date</label>
+                            <input type="date" id="taskDueDate" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick="closeTaskModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveTaskBtn">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: New Category -->
+    <div class="modal-overlay" id="categoryModal">
+        <div class="modal-card" style="max-width: 440px;">
+            <div class="modal-header">
+                <h3>Add New Category</h3>
+                <button type="button" class="btn-ghost-sm" onclick="closeCategoryModal()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <form id="categoryForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="categoryName">Category Name *</label>
+                        <input type="text" id="categoryName" class="form-control" placeholder="e.g. Security, Infrastructure" required maxlength="60">
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryColor">Color Badge</label>
+                        <input type="color" id="categoryColor" class="form-control" value="#3b82f6" style="height: 40px; padding: 4px; cursor: pointer;">
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryDesc">Description</label>
+                        <input type="text" id="categoryDesc" class="form-control" placeholder="Short description of this category...">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick="closeCategoryModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="container" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;">
+            <div>
+                &copy; 2026 Task Manager REST API &bull; Layered Spring MVC Architecture with Hibernate/JPA &amp; MySQL
+            </div>
+            <div style="display: flex; gap: 16px;">
+                <a href="/swagger-ui.html" target="_blank" style="color: var(--text-secondary); text-decoration: none;">API Docs</a>
+                <a href="/v3/api-docs" target="_blank" style="color: var(--text-secondary); text-decoration: none;">OpenAPI JSON</a>
+                <a href="/api/v1/dashboard/health" target="_blank" style="color: var(--text-secondary); text-decoration: none;">Health Check</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- App Script -->
+    <script src="/js/app.js"></script>
+</body>
+</html>
